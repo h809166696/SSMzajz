@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hj.dao.FileMapper">
+    <select id="getFileList" resultType="fileModel">
+        SELECT * FROM managerFile WHERE 1=1
+        <if test="fileModel.fileName != null and fileModel.fileName != ''">
+            AND fileName like concat("%",#{fileModel.fileName},"%")
+        </if>
+        <if test="page.page>0">
+            limit #{page.start},#{page.end}
+        </if>
+    </select>
+
+    <select id="getFileTotal" resultType="long">
+        SELECT count(1) FROM managerFile WHERE 1=1
+        <if test="fileModel.fileName != null and fileModel.fileName != ''">
+            AND fileName like concat("%",#{fileModel.fileName},"%")
+        </if>
+
+    </select>
+
+    <insert id="addFile">
+        INSERT INTO managerFile (fileName,addtime) VALUES (#{fileModel.fileName},#{fileModel.addtime}) on
+duplicate
+key update addtime=#{fileModel.addtime}
+    </insert>
+
+</mapper>

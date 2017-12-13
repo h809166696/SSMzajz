@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hj.dao.SysroleMapper" >
+    <select id="getAllRole" resultType="sysrole">
+        select r.id,r.name from sysrole r where 1=1
+        <if test="sysrole.name != null and sysrole.name != ''">
+            and name like concat('%',#{sysrole.name},'%')
+        </if>
+    </select>
+
+    <!--用户角色表相关操作-->
+    <update id="editUserRole">
+        UPDATE user_role
+        <set>
+            <if test="sysRole.roleId != null and sysRole.roleId!=0">
+                roleId=#{sysRole.roleId}
+            </if>
+        </set>
+        WHERE userId=#{sysRole.UID}
+    </update>
+
+    <insert id="addUserRole">
+        INSERT INTO user_role (userId,roleId) VALUES (#{sysRole.UID},#{sysRole.roleId})
+    </insert>
+
+    <delete id="deleteUserRole">
+        DELETE FROM user_role WHERE userId=#{UID}
+    </delete>
+
+    <!--角色表相关操作-->
+    <!--<select id="datagrid" resultType="sysrole">-->
+           <!--SELECT r.id,r.name-->
+    <!--</select>-->
+    <select id="datagrid" resultType="sysrole">
+        select r.id,r.name from sysrole r where 1=1
+        <if test="sysrole.name != null and sysrole.name != ''">
+            and name like concat('%',#{sysrole.name},'%')
+        </if>
+        <if test="page.page>0">
+            limit #{page.start},#{page.end}
+        </if>
+    </select>
+    <select id="datagridTotal" resultType="long">
+        select count(1) from sysrole WHERE 1=1
+        <if test="sysrole.name !='' and sysrole.name !=null">
+            AND name like concat('%',#{sysrole.name},'%')
+        </if>
+    </select>
+    <update id="editRole">
+        UPDATE sysrole
+        <set>
+            <if test="sysRole.name != null and sysRole.name!=''">
+                name=#{sysRole.name}
+            </if>
+        </set>
+        WHERE id=#{sysRole.id}
+    </update>
+
+    <insert id="addRole">
+        INSERT INTO sysrole (name) VALUES (#{sysRole.name})
+    </insert>
+
+    <delete id="deleteRole">
+        DELETE FROM sysrole WHERE id=#{id}
+    </delete>
+  <!--添加rolemenu表数据-->
+    <insert id="addRoleMenu">
+        INSERT ignore INTO role_menu(role_id,menu_id) VALUES (#{roleMenu.role_id},#{roleMenu.menu_id})
+    </insert>
+    <!--删除rolemenu表中的单独一条-->
+    <delete id="deleteRoleMenu">
+        DELETE FROM role_menu WHERE role_id=#{roleMenu.role_id} AND menu_id=#{roleMenu.menu_id}
+    </delete>
+</mapper>

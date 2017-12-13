@@ -1,0 +1,115 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:cache="http://www.springframework.org/schema/cache"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+		http://www.springframework.org/schema/beans/spring-beans-4.3.xsd
+		http://www.springframework.org/schema/context 
+		http://www.springframework.org/schema/context/spring-context-4.3.xsd http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache.xsd">
+
+    <!-- 自动扫描(自动注入) -->
+    <context:component-scan base-package="com.hj.dao"></context:component-scan>
+    <!-- 加载db.properties,redis.properties文件 -->
+    <context:property-placeholder
+            location="classpath:db.properties,classpath:redis.properties"/>
+
+    <!-- 配置数据源 ，dbcp -->
+    <bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource"
+          destroy-method="close">
+        <property name="driverClassName" value="${jdbc.driver}"/>
+        <property name="url" value="${jdbc.url}"/>
+        <property name="username" value="${jdbc.username}"/>
+        <property name="password" value="${jdbc.password}"/>
+        <property name="maxActive" value="30"/>
+        <property name="maxIdle" value="5"/>
+    </bean>
+
+    <!-- sqlSessionFactory -->
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <!-- 数据库连接池 -->
+        <property name="dataSource" ref="dataSource"/>
+        <!-- 加载mybatis的全局配置文件 -->
+        <property name="configLocation" value="classpath:mybatis/sqlMapConfig.xml"/>
+        <!--配置mapper.xml扫描-->
+        <property name="mapperLocations" value="classpath:mybatis/mapper/*.xml"/>
+    </bean>
+
+
+    <!-- mapper扫描器 spring 3.0 和 jdk1.8有冲突 换成spring 4.0及以上就没问题-->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <!-- 扫描包路径，如果需要扫描多个包，中间使用半角逗号隔开 -->
+        <property name="basePackage" value="com.hj.dao"></property>
+        <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"/>
+    </bean>
+
+
+    <!-- 缓存配置(两种) -->
+    <!-- 启用缓存注解功能(请将其配置在Spring主配置文件中) -->
+    <cache:annotation-driven cache-manager="cacheManager"/>
+    <!-- Spring自己的基于java.util.concurrent.ConcurrentHashMap实现的缓存管理器(该功能是从Spring3.1开始提供的) -->
+    <!--
+    <bean id="cacheManager" class="org.springframework.cache.support.SimpleCacheManager">
+        <property name="caches">
+            <set>
+                <bean name="myCache" class="org.springframework.cache.concurrent.ConcurrentMapCacheFactoryBean"/>
+            </set>
+        </property>
+    </bean>
+     -->
+    <!-- 若只想使用Spring自身提供的缓存器,则注释掉下面的两个关于Ehcache配置的bean,并启用上面的SimpleCacheManager即可 -->
+    <!-- Spring提供的基于的Ehcache实现的缓存管理器 -->
+    <bean id="cacheManagerFactory" class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean">
+        <property name="configLocation" value="classpath:spring/ehcache.xml"/>
+    </bean>
+    <bean id="cacheManager" class="org.springframework.cache.ehcache.EhCacheCacheManager">
+        <property name="cacheManager" ref="cacheManagerFactory"/>
+    </bean>
+
+    <!--<bean id="cacheManager" class="org.springframework.cache.ehcache.EhCacheCacheManager" p:cache-manager-ref="ehcache"/>-->
+    <!--&lt;!&ndash;这里并不是EhCacheManagerFactoryBean的实例，而是EhCache中CacheManager的一个实例  &ndash;&gt;-->
+    <!--&lt;!&ndash;因为Spring和EhCache都定义了CacheManager类型  &ndash;&gt;-->
+    <!--<bean id="ehcache" class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean">-->
+        <!--<property name="configLocation" value="classpath:spring/ehcache.xml" />-->
+        <!--<property name="shared" value="true"/>-->
+    <!--</bean>-->
+
+
+
+    <!-- redis数据源 -->
+    <!--<bean id="poolConfig" class="redis.clients.jedis.JedisPoolConfig">-->
+        <!--<property name="maxIdle" value="${redis.maxIdle}" />-->
+        <!--<property name="maxTotal" value="${redis.maxActive}" />-->
+        <!--<property name="maxWaitMillis" value="${redis.maxWait}" />-->
+        <!--&lt;!&ndash;<property name="testOnBorrow" value="${redis.testOnBorrow}"/>&ndash;&gt;-->
+    <!--</bean>-->
+    <!--&lt;!&ndash; Spring-redis连接池管理工厂 &ndash;&gt;-->
+    <!--<bean id="jedisConnectionFactory" class="org.springframework.data.redis.connection.jedis.JedisConnectionFactory"-->
+          <!--p:host-name="${redis.host}" p:port="${redis.port}" p:password="${redis.pass}"  p:pool-config-ref="poolConfig"/>-->
+    <!--&lt;!&ndash; 使用中间类解决RedisCache.jedisConnectionFactory的静态注入，从而使MyBatis实现第三方缓存 &ndash;&gt;-->
+    <!--<bean id="redisCacheTransfer" class="com.hj.cache.RedisCacheTransfer">-->
+        <!--<property name="jedisConnectionFactory" ref="jedisConnectionFactory"/>-->
+    <!--</bean>-->
+
+    <!-- 配置数据源,redis -->
+    <!--<bean id="poolConfig" class="redis.clients.jedis.JedisPoolConfig">-->
+        <!--<property name="maxIdle" value="${redis.maxIdle}" />-->
+        <!--<property name="maxTotal" value="${redis.maxActive}" />-->
+        <!--<property name="maxWaitMillis" value="${redis.maxWait}" />-->
+        <!--<property name="testOnBorrow" value="${redis.testOnBorrow}" />-->
+    <!--</bean>-->
+
+    <!--<bean id="jedisPool" class="redis.clients.jedis.JedisPool">-->
+        <!--<constructor-arg name="poolConfig" ref="poolConfig" />-->
+        <!--<constructor-arg name="host" value="${redis.host}" />-->
+        <!--<constructor-arg name="port" value="${redis.port}" type="int" />-->
+        <!--<constructor-arg name="timeout" value="${redis.timeout}" type="int" />-->
+    <!--</bean>-->
+
+    <!--&lt;!&ndash; jedisPool注入 &ndash;&gt;-->
+    <!--<bean id="jedisUtils" class="com.outman.utils.JedisUtils">-->
+        <!--<property name="jedisPool" ref="jedisPool"/>-->
+    <!--</bean>-->
+
+</beans>

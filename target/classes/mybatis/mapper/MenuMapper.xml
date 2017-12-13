@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hj.dao.MenuMapper">
+<resultMap type="com.hj.po.SysMenu" id="menuResultMap">
+    <id column="id" property="id"></id>
+    <result column="name" property="name"></result>
+    <result column="url" property="url"></result>
+    <result column="parentid" property="parentid"/>
+    <result column="enable" property="enable"/>
+    <result column="sequence" property="sequence"/>
+    <result column="iconCls" property="iconCls"/>
+</resultMap>
+    <select id="getDatagridTotal" resultType="long">
+        SELECT count(1) FROM sysmenu WHERE parentid=0
+        <if test="name != null and name != ''">
+            AND name like concat('%',#{name},'%')
+        </if>
+    </select>
+    <select id="datagridMenu" resultType="sysMenu">
+        SELECT id,name,url from sysmenu WHERE parentid=0
+        <if test="sort != null and sort != ''">
+            order by ${sort} ${order}
+        </if>
+        <if test="page > 0">
+            limit #{start},#{end}
+        </if>
+    </select>
+
+    <select id="getAll" resultType="sysMenu">
+        select id,parentid,sequence,iconCls,name,url,enable from sysmenu where 1=1
+        <if test="sort != null and sort != ''">
+            order by ${sort} ${order}
+        </if>
+        <if test="page > 0">
+            limit #{start},#{end}
+        </if>
+    </select>
+
+    <select id="listAllParentMenu" resultMap="menuResultMap">
+        SELECT * FROM  sysmenu WHERE parentid = 0 and enable = 1
+    </select>
+
+    <select id="listSubMenuByparentid" parameterType="int" resultMap="menuResultMap">
+        SELECT * FROM sysmenu WHERE parentid = #{parentid}
+    </select>
+    <select id="getMenuById" parameterType="int" resultMap="menuResultMap">
+        SELECT * FROM sysmenu WHERE id = #{id}
+    </select>
+    <select id="listAllSubMenu" resultMap="menuResultMap">
+        select * from sysmenu where parentid >=1
+    </select>
+
+    <insert id="insertMenu" parameterType="sysMenu" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO sysmenu (name,url,parentid) VALUES (#{name},#{url},#{parentid})
+    </insert>
+    <update id="updateMenu" parameterType="sysMenu">
+        UPDATE sysmenu set name=#{name},
+        url=#{url},
+        parentid=#{parentid}
+        WHERE id=#{id}
+    </update>
+
+    <delete id="deleteMenuById" parameterType="int">
+        DELETE FROM sysmenu WHERE id=#{id} or parentid=#{id}
+    </delete>
+</mapper>

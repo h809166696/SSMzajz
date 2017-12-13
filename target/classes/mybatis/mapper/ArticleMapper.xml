@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hj.dao.ArticleMapper">
+    <resultMap type="article" id="articleMapper">
+        <id column="ARTICLEID" property="ARTICLEID"></id>
+        <result column="ARTICLENAME" property="ARTICLENAME"></result>
+        <result column="ARTICLECONTENT" property="ARTICLECONTENT"></result>
+        <result column="ARTICLEIMG" property="ARTICLEIMG"></result>
+        <result column="ARTICLEDATE" property="ARTICLEDATE"></result>
+        <result column="DISCUSSCOUNT" property="DISCUSSCOUNT"></result>
+        <result column="LOOKCOUNT" property="LOOKCOUNT"></result>
+        <result column="commentCount" property="commentCount"></result>
+        <result column="lastEditTime" property="lastEditTime"></result>
+        <result column="isDelete" property="isDelete"></result>
+        <result column="isJing" property="isJing"></result>
+        <result column="isDing" property="isDing"></result>
+        <!--<association property="user" column="UID"-->
+                     <!--select="com.hj.dao.UserMapper.findUserById" />-->
+        <association property="user" javaType="com.hj.po.User">
+            <id column="UID" property="UID"/>
+            <result column="NAME" property="NAME"/>
+            <result column="HEADURL" property="HEADURL"/>
+
+        </association>
+    </resultMap>
+    <select id="getArticle" resultMap="articleMapper">
+        select art.*,u.NAME,u.HEADURL from  article art LEFT JOIN usertable u ON u.UID=art.UID WHERE 1=1
+        <if test="searchText != null and searchText != ''">
+            AND
+            concat(IFNULL(art.ARTICLENAME,''),IFNULL(u.NAME,'')) LIKE concat('%',#{searchText},'%')
+        </if>
+        <if test="page.sort != null and page.sort != ''">
+            ORDER BY ${page.sort} ${page.order}
+        </if>
+        <if test="page.page>0">
+            limit #{page.start},#{page.end}
+        </if>
+    </select>
+  <select id="getArticleTotal" resultType="long">
+      select count(1) from  article art LEFT JOIN usertable u ON u.UID=art.UID WHERE 1=1
+      <if test="searchText != null and searchText != ''">
+          AND
+          concat(IFNULL(art.ARTICLENAME,''),IFNULL(u.NAME,'')) LIKE concat('%',#{searchText},'%')
+      </if>
+  </select>
+    <update id="editArticleDelete">
+        UPDATE article <set>
+        <if test="article.isDelete != null">
+         isDelete=#{article.isDelete},
+        </if>
+        <if test="article.isJing != null">
+          isJing=#{article.isJing},
+        </if>
+        <if test="article.isDing != null">
+          isDing=#{article.isDing}
+        </if>
+    </set>
+        WHERE ARTICLEID=#{article.ARTICLEID}
+    </update>
+
+
+</mapper>
