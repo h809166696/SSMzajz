@@ -1,9 +1,11 @@
 package com.hj.po;
 
+import java.io.Serializable;
+
 /**
  * Created by hongjin on 2017/12/10.
  */
-public class RoleMenu {
+public class RoleMenu implements Serializable {
     private Integer id;
     private Integer role_id;
     private Integer menu_id;

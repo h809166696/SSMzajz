@@ -19,8 +19,10 @@
     <!-- 加载spring容器 -->
     <context-param>
         <param-name>contextConfigLocation</param-name>
-        <param-value>classpath:spring/applicationContext-*.xml</param-value>
+        <param-value>classpath:spring/applicationContext-*.xml,classpath:spring/spring-redis.xml</param-value>
     </context-param>
+
+
     <listener>
         <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
     </listener>

@@ -1,9 +1,10 @@
 package com.hj.po;
+import java.io.Serializable;
 import java.util.List;
 /**
  * Created by hongjin on 2017/11/17.
  */
-public class SysMenu {
+public class SysMenu implements Serializable {
     /**
      * 菜单ID
      */

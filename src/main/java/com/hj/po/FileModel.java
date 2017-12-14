@@ -1,9 +1,11 @@
 package com.hj.po;
 
+import java.io.Serializable;
+
 /**
  * Created by hongjin on 2017/12/12.
  */
-public class FileModel {
+public class FileModel implements Serializable {
 
     private String fileName;
  private String addtime;

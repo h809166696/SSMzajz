@@ -8,6 +8,7 @@ import com.hj.po.easyui.PageHelper;
 import com.hj.service.SysroleService;
 import com.hj.service.UserService;
 import com.hj.utils.StringCatagroy;
+import com.hj.utils.redistakes.UserRedisTakes;
 import com.sun.org.apache.bcel.internal.generic.NEW;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
@@ -33,13 +35,28 @@ public class UserController extends BaseController{
     private UserService userService;
     @Autowired
     private SysroleService sysroleService;
+    @Resource(name = "UserRedisTakes")
+    private UserRedisTakes userRedisTakes;
     @RequestMapping("/userQuery")
     public ModelAndView userQuery() throws Exception{
-        User user = userService.findUserById(8);
+        User redisUser = userRedisTakes.getObj("User","1");
+        User user = null;
+        if (redisUser == null) {
+          user  = userService.findUserById(1);
+          if (user != null){
+              userRedisTakes.addObj("User","1",user);
+          }
+
+        }else {
+            user = redisUser;
+
+        }
+
         ModelAndView modelAndView = new ModelAndView();
         if (user != null){
             modelAndView.addObject("username",user.getNAME());
         }
+
         modelAndView.setViewName("test");
         return modelAndView;
     }
