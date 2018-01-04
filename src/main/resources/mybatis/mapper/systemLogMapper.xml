@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.hj.dao.systemLogMapper" >
+    <insert id="saveLog">
+        INSERT INTO systemLog (actionType,businessLogic,userId,userName) VALUES (#{systemLog1.actionType},#{systemLog1.businessLogic},#{systemLog1.userId},#{systemLog1.userName})
+    </insert>
+</mapper>

@@ -3,8 +3,11 @@
  */
 package com.hj.interceptor;
 
+import com.hj.annotation.record;
 import com.hj.po.User;
+import com.hj.po.systemLog;
 import com.hj.service.UserService;
+import com.hj.service.systemLogService;
 import com.hj.utils.RequestUtil;
 import com.hj.utils.UserCookieUtil;
 import com.hj.utils.common.Const;
@@ -12,6 +15,8 @@ import com.hj.utils.common.MD5;
 import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
@@ -23,10 +28,13 @@ import javax.servlet.http.HttpServletResponse;
 /**
  * @author zh
  */
+
 public class CommonInterceptor extends HandlerInterceptorAdapter {
 	private final Logger log = LoggerFactory.getLogger(CommonInterceptor.class);
 	@Resource
 	private UserService userService;
+	@Resource
+	private systemLogService systemLogService;
 	/*
 	 * 利用正则映射到需要拦截的路径    
 	 
@@ -138,6 +146,22 @@ public class CommonInterceptor extends HandlerInterceptorAdapter {
     public void postHandle(HttpServletRequest request,
                            HttpServletResponse response, Object handler,
                            ModelAndView modelAndView) throws Exception {
+//这边通过反射获取注解内容 进行日志的写入
+		HandlerMethod hm = (HandlerMethod) handler;
+		record re = hm.getMethodAnnotation(record.class);
+		if (re != null){
+			String actionType = re.actionType();
+			String businessLogic = re.businessLogic();
+			User user =  (User)request.getSession().getAttribute(Const.SESSION_USER);
+
+			systemLog systemLog = new systemLog();
+			systemLog.setActionType(actionType);
+			systemLog.setBusinessLogic(businessLogic);
+			systemLog.setUserId(user.getUID());
+			systemLog.setUserName(user.getNAME());
+			systemLogService.saveLog(systemLog);
+		}
+		super.postHandle(request,response,handler,modelAndView);
     }  
   
     /** 
@@ -148,7 +172,8 @@ public class CommonInterceptor extends HandlerInterceptorAdapter {
     @Override  
     public void afterCompletion(HttpServletRequest request,
                                 HttpServletResponse response, Object handler, Exception ex)
-            throws Exception {  
+            throws Exception {
+
     }  
 
 }  

@@ -1,5 +1,6 @@
 package com.hj.controller;
 
+import com.hj.annotation.record;
 import com.hj.po.Article;
 import com.hj.po.easyui.DataGrid;
 import com.hj.po.easyui.Json;
@@ -16,7 +17,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
  */
 @Controller
 @RequestMapping(value = "/BBS")
-public class ArticleController {
+public class ArticleController extends BaseController{
     @Autowired
    private ArticleService articleService;
     @RequestMapping(value = "/articlelist",method = RequestMethod.GET)
@@ -29,6 +30,7 @@ public class ArticleController {
     }
     @ResponseBody
     @RequestMapping(value = "/getArticle")
+    @record(actionType = "查询",businessLogic = "帖子")
     public DataGrid getArticle(String searchText, PageHelper pageHelper){
         return articleService.getArticle(searchText,pageHelper);
     }
